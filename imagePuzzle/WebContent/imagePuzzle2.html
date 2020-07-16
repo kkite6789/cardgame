@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+ <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+<style>
+p{
+		font-size:30px;
+		font-weight:bold;
+		color:black;
+		display: table-cell;
+		text-align:center; /*가로정렬*/
+		vertical-align:middle; /*세로정렬*/
+	}
+.numDiv{
+		width: 70px;
+		height: 70px;
+		border: 1px solid gray;
+		margin-right : 5px;
+		display: table;
+		float: middle;
+	}
+	#time {
+		background-color: yellow;
+	}
+</style>
+</head>
+<body>
+	<div class="container-fluid">
+	<div class="row">
+	<div class="col-sm-3"></div>
+	<div class="col-sm-6">
+	<h1 style="text-align:center"> PUZZLE </h1>
+	
+	<br>
+		<div class="progress" >
+ 			<div id="hpBar" class="progress-bar bg-danger" style="width:100% float:left">HP</div>
+		</div>
+
+		
+	
+		<br>
+		<br>
+		<div>
+		<table style="margin:0 auto;" class="table-bordered">
+			<tr id="board"></tr>
+			<tr id="board1"></tr>
+			<tr id="board2"></tr>
+			<tr id="board3"></tr>
+		</table>
+		</div>
+		<br>
+		<div class="form-group">
+			<textarea class="form-control" id="output" cols="50" rows="5" readonly></textarea>
+		<br>
+		</div>
+		<span>
+			<a class="btn btn-outline-primary" href="">재시작</a>
+		</span>
+		<span style="float: right;">
+			<input  type="text" id="cheatTxt">
+			<button  class="btn btn-outline-dark"  type="button" id="cheatBtn">치트키</button>
+		</span>
+		<br>
+		<div style="text-align:right">
+			<label >show me the money  --  체력100</label>
+		</div>
+		<div style="text-align:right">
+			<label>infinite time  --  시간초30초</label>
+		</div>
+	</div>
+	<div class="col-sm-1">
+		<br>
+		<br>
+		<div style="margin:0 auto; " class="numDiv" id="time"><p id="timeNum">30</p></div>
+	</div>
+	<div class="col-sm-2"></div>
+	</div>
+	</div>
+</body>
+ 
+<script>
+	
+	let model=[
+		
+		"1.jpeg","1.jpeg",
+		"2.jpeg","2.jpeg",
+		"3.jpeg","3.jpeg",
+		"4.jpeg","4.jpeg",
+		"5.jpeg","5.jpeg",
+		"6.jpeg","6.jpeg",
+		"7.jpeg","7.jpeg",
+		"8.jpeg","8.jpeg"
+		
+	];
+	
+	for(let i=0; i<10000; i++) {
+		let r = Math.floor(Math.random()*model.length);
+		let temp = model[0];
+		model[0] = model[r];
+		model[r] = temp;
+	}
+	
+	
+
+	
+	$(model).each(function(index, item){
+		
+		if(index<4){
+			$("#board").append("<td><input class='pic' type='image' src='./imgs/"+item+"' value='"+item+"'></td>");
+		} else if(index<8){
+			$("#board1").append("<td><input class='pic' type='image' src='./imgs/"+item+"' value='"+item+"'></td>");
+		} else if(index<12){
+			$("#board2").append("<td><input class='pic' type='image' src='./imgs/"+item+"' value='"+item+"'></td>");
+		} else{
+			$("#board3").append("<td><input class='pic' type='image' src='./imgs/"+item+"' value='"+item+"'></td>");
+		}
+	});
+	
+	let endTime = null;
+	
+	$("#hpBar").attr("style","width:100%");
+	let timeFull=30;
+	$("#timeNum").text(timeFull);
+	let hp=100;
+	let time=100;
+	let minusTime = 3;
+	let timeTimer=null;
+	
+	let startTime=null;
+	
+	
+	let outputText = ""
+		outputText +="곧 시작합니다.";
+		$("#output").val(outputText);
+	$(".pic").attr('disabled', true);
+	
+	setTimeout(function(){
+		
+		let outputText = ""
+			outputText +="2초 후 시작";
+			$("#output").css("color","red");
+			$("#output").val(outputText);
+	}, 1000);
+	
+	
+	setTimeout(function(){
+		let outputText = ""
+			outputText +="1초 후 시작";
+			$("#output").val(outputText);
+	}, 2000);
+	setTimeout(function(){
+		$(".pic").each(function(index, item){
+			$(".pic").attr('disabled', false);
+			let outputText = ""
+				outputText +="시작!";
+			$("#output").css("color","black");
+				$("#output").val(outputText);
+			$(item).css("opacity","0.01");
+			startTime = new Date(); //게임이 시작하는 시간
+		});
+		timeTimer=setInterval(function(){
+			if(timeFull== 0){
+				clearInterval(timeTimer);
+				let outputText = ""
+					outputText +="시간초과\n";
+				$("#output").val(outputText);
+				alert("시간초과!");
+				$(".pic").attr('disabled', false);
+			}
+			$("#timeNum").text(timeFull-=1)
+			
+		},1000);
+	}, 3000);
+	
+	$(".pic").click(function(){
+		//alert($(this).val()+"click");
+	});
+	let plusHp=10;
+	let minusHp=10;
+	
+	let goal=8;
+	let count=0;
+	let winCount=0;
+	let stage=0; // 0:첫번째 클릭 1:두번째 클릭
+	let onepic=null;
+	let twopic=null;
+	$(".pic").click(function(){
+		count +=1;
+		console.log($(this).val()+"click!");
+		$(this).css("opacity","1");
+		//old= new Date();
+		if(stage==0) { //첫번째 클릭
+			onePic = this;
+			console.log(onePic);
+			stage =1;
+		} else if(stage == 1){ //두번째 클릭
+			twoPic = this;
+			console.log(twoPic);
+			if($(onePic).val() == $(twoPic).val()) {
+				console.log("같다.");
+				hp+=minusHp;	
+				$("#hpBar").attr("style","width:"+hp+"%");
+				let outputText = ""
+					outputText +="맞았습니다!";
+				$("#output").css("color","blue");
+				$("#output").val(outputText);
+				$(onePic).unbind("click"); //열려있는 이미지의 클릭 방지
+				$(twoPic).unbind("click");
+				winCount+=1;
+			}else {
+				console.log("다르다.");
+				hp-=minusHp;	
+				$("#hpBar").attr("style","width:"+hp+"%");
+				let outputText = ""
+					outputText +="틀렸습니다";
+				$("#output").css("color","red");
+				$("#output").val(outputText);
+				if(hp == 0) {
+					clearInterval(timeTimer);
+					$("#output").val("hp가 다떨어졌습니다.");
+					alert("gameover!");
+					$(".pic").attr('disabled', true);
+					
+					}
+				setTimeout(function(){
+					
+					$(onePic).css("opacity","0.01");
+					$(twoPic).css("opacity","0.01");	
+				},500);
+			}
+			/*
+			if(winCount == model.length/2){
+				setTimeout(function(){
+				//new = new Date();
+				alert("게임 클리어");
+				//var gap = new.getTime()-old.getTime();
+				//console.log(gap);
+				}, 1000);
+			}
+			*/
+			if(winCount==model.length/2){
+				setTimeout(function(){
+				endTime = new Date();
+				clearInterval(timeTimer);
+				let t = (endTime.getTime() - startTime.getTime()) / 1000;
+				//$("#output").val("END");//$(),text(),$(),html()//span태그를 사용함,$().val()
+				let outputText = ""
+				outputText +="CLEAR\n";
+				outputText +=count;
+				outputText +="번 시도했습니다."
+				outputText +="\n";
+				outputText +=t;
+				outputText +="초";
+				$("#output").css("color","black");
+				$("#output").val(outputText);
+				alert("클리어!");	
+				$(".pic").attr('disabled', true);
+			}, 500);
+			}
+			stage = 0;
+		}
+		
+	});
+	$("#cheatBtn").click(function(){
+		if($("#cheatTxt").val() == "show me the money"){
+			hp=100;
+			$("#hpBar").attr("style","width:"+hp+"%");
+		}
+			if($("#cheatTxt").val() == "infinite time"){
+				$("#timeNum").text("30");
+				timeFull=30;
+		}
+	});
+	
+	/*
+	1 16개의 그림이미지를 화면에 보여준다.
+	2 랜덤으로 섞어서 보여준다.
+	3 이미지를 안보이게 한다.
+	4 이미지 클릭 이벤트 리스너 추가
+	5 이미지를 첫번째 클릭하면 이미지가 보여야 한다
+	6 이미지를 두번째 클릭하면 첫번째 이미지와 비교후 같으면 이미지를 보여주고 이벤트를 제거 성공횟수를 1증가
+	7 이미지를 두번째 클릭하면 첫번째 이미지와 비교후 다르면 이미지를 초기화
+	8 이미지 두번째 클릭후 이미지클릭 카운터를 초기화
+	9 5,6,7,8 반복하다가 성공횟수가 전체그림의 수/2 와 같으면 게임종료
+	10 시간 
+	
+	
+	
+	*/
+	
+</script>
+</html>
